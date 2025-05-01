@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  llama-server:
+    image: ghcr.io/ggerganov/llama.cpp:server
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./models:/models
+    environment:
+      - MODEL=/models/google_gemma-3-27b-it-Q4_K_M.gguf
+    command: server -m /models/google_gemma-3-27b-it-Q4_K_M.gguf --host 0.0.0.0 --port 8080 --threads 8
+    # macOS specific settings
+    platform: linux/amd64
+    # Optional: Add more CPU threads if you have a powerful Mac
+    # command: server -m /models/google_gemma-3-27b-it-Q4_K_M.gguf --host 0.0.0.0 --port 8080 --threads 12
+
+  fastapi-app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_SERVER_URL=http://llama-server:8080
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - llama-server
+
+volumes:
+  ollama_data: 

@@ -1,4 +1,3 @@
-*.gguf
 venv
 __pycache__
 *.pyc
@@ -6,3 +5,4 @@ __pycache__
 *.pyd
 *.pyw
 *.pyz
+*.pywz
