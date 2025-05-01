@@ -2,8 +2,6 @@
 
 A FastAPI-based server that provides an OpenAI-compatible API interface for local LLM models using [`llama.cpp`](https://github.com/ggerganov/llama.cpp), fully optimized for macOS with Metal GPU acceleration.
 
----
-
 ## 🚀 Features
 
 - OpenAI-compatible API endpoints (`/v1/chat/completions`)
@@ -13,8 +11,6 @@ A FastAPI-based server that provides an OpenAI-compatible API interface for loca
 - Direct `llama.cpp` completion endpoint exposed
 - Log tailing and custom model aliases supported
 
----
-
 ## 🧱 Prerequisites
 
 - macOS with Apple Silicon (M1/M2/M4)
@@ -22,8 +18,6 @@ A FastAPI-based server that provides an OpenAI-compatible API interface for loca
 - Python 3.11+
 - Docker + Docker Compose
 - `brew`, `curl`, and `make`
-
----
 
 ## ⚙️ Installation
 
@@ -33,8 +27,6 @@ A FastAPI-based server that provides an OpenAI-compatible API interface for loca
 git clone <repository-url>
 cd llm-fast-api
 ```
-
-````
 
 ### 2. Create and Activate a Virtual Environment
 
@@ -48,8 +40,6 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```bash
 pip install -r requirements.txt
 ```
-
----
 
 ## 🔧 Setup
 
@@ -89,15 +79,11 @@ curl -L -o models/google_gemma-3-27b-it-q4_K_M.gguf \
 
 > Optional: Monitor logs with `tail -f llama-server.log`
 
----
-
 ## 🐳 Start FastAPI Proxy Server (Docker)
 
 ```bash
 docker compose up --build
 ```
-
----
 
 ## 🌐 API Endpoints
 
@@ -132,8 +118,6 @@ curl -X POST http://localhost:8080/completion \
   }'
 ```
 
----
-
 ## 📂 Project Structure
 
 ```
@@ -154,15 +138,11 @@ llm-fast-api/
 └── README.md
 ```
 
----
-
 ## 🔐 Environment Configuration
 
 Set via Docker or `.env` file (optional):
 
 - `LLM_SERVER_URL=http://host.docker.internal:8080`
-
----
 
 ## ⚙️ Development
 
@@ -175,25 +155,16 @@ docker compose build
 docker compose up
 ```
 
----
-
 ## 🚦 Performance Tips
 
 - Make sure you use the `--mlock` flag for best performance on macOS
 - Metal GPU acceleration is enabled via `LLAMA_METAL=1`
 - Keep logs open via: `tail -f llama-server.log`
 
----
-
 ## 📜 License
 
 [Your License Here]
 
----
-
 ## 🤝 Contributing
 
 [Your Contribution Guidelines Here]
-
----
-````
