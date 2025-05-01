@@ -1,68 +1,107 @@
-# LLM FastAPI Server
+# 🤖 LLM FastAPI Server for Gemma 3 27B (Apple Silicon Optimized)
 
-A FastAPI-based server that provides an OpenAI-compatible API interface for local LLM models using llama.cpp.
+A FastAPI-based server that provides an OpenAI-compatible API interface for local LLM models using [`llama.cpp`](https://github.com/ggerganov/llama.cpp), fully optimized for macOS with Metal GPU acceleration.
 
-## Features
+---
 
-- OpenAI-compatible API endpoints
-- Support for local LLM models via llama.cpp
-- Docker containerization for the API server
-- Easy integration with existing OpenAI-based applications
+## 🚀 Features
 
-## Prerequisites
+- OpenAI-compatible API endpoints (`/v1/chat/completions`)
+- Runs locally using `llama.cpp` on Apple Silicon (Metal support)
+- Dockerized FastAPI proxy
+- Easy integration with OpenAI SDKs and apps (e.g., LangChain, AutoGen, etc.)
+- Direct `llama.cpp` completion endpoint exposed
+- Log tailing and custom model aliases supported
 
+---
+
+## 🧱 Prerequisites
+
+- macOS with Apple Silicon (M1/M2/M4)
+- 64GB RAM for Gemma 3 27B
 - Python 3.11+
-- Docker and Docker Compose
-- llama.cpp installed locally
-- A compatible GGUF model file (e.g., google_gemma-3-27b-it-Q4_K_M.gguf)
+- Docker + Docker Compose
+- `brew`, `curl`, and `make`
 
-## Installation
+---
 
-1. Clone the repository:
+## ⚙️ Installation
+
+### 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
 cd llm-fast-api
 ```
 
-2. Create and activate a virtual environment:
+````
+
+### 2. Create and Activate a Virtual Environment
 
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. Install dependencies:
+### 3. Install Python Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Setup
+---
 
-1. Install llama.cpp:
+## 🔧 Setup
 
-```bash
-brew install llama.cpp
-```
-
-2. Place your GGUF model file in a convenient location (e.g., in the project root)
-
-3. Start the llama.cpp server:
+### 1. Install `llama.cpp` with Metal Support
 
 ```bash
-llama-server -m ./google_gemma-3-27b-it-Q4_K_M.gguf --host 127.0.0.1 --port 8080
+git clone https://github.com/ggerganov/llama.cpp.git
+cd llama.cpp
+LLAMA_METAL=1 make -j$(sysctl -n hw.logicalcpu)
+cd ..
 ```
 
-4. Start the FastAPI server:
+### 2. Download the Gemma 3 27B Instruct Model
 
 ```bash
-docker compose up
+mkdir -p models
+curl -L -o models/google_gemma-3-27b-it-q4_K_M.gguf \
+  https://huggingface.co/TheBloke/gemma-1.1-7B-Instruct-GGUF/resolve/main/google_gemma-3-27b-it-q4_K_M.gguf
 ```
 
-## API Endpoints
+> Replace the URL if you are hosting the 27B model elsewhere.
 
-### Chat Completion
+### 3. Run `llama-server` Locally (Metal GPU)
+
+```bash
+./llama.cpp/server/llama-server \
+  -m models/google_gemma-3-27b-it-q4_K_M.gguf \
+  --model-alias google_gemma-3-27b-it \
+  --threads 32 \
+  --gpu-layers 60 \
+  -c 8192 \
+  --mlock \
+  --host 127.0.0.1 \
+  --port 8080 \
+  > llama-server.log 2>&1 &
+```
+
+> Optional: Monitor logs with `tail -f llama-server.log`
+
+---
+
+## 🐳 Start FastAPI Proxy Server (Docker)
+
+```bash
+docker compose up --build
+```
+
+---
+
+## 🌐 API Endpoints
+
+### ✅ OpenAI-Compatible Chat Completion
 
 ```bash
 curl -X POST http://localhost:8000/v1/chat/completions \
@@ -80,7 +119,7 @@ curl -X POST http://localhost:8000/v1/chat/completions \
   }'
 ```
 
-### Direct llama.cpp API
+### 🔁 Direct llama.cpp Completion API
 
 ```bash
 curl -X POST http://localhost:8080/completion \
@@ -93,7 +132,9 @@ curl -X POST http://localhost:8080/completion \
   }'
 ```
 
-## Project Structure
+---
+
+## 📂 Project Structure
 
 ```
 llm-fast-api/
@@ -105,43 +146,54 @@ llm-fast-api/
 │   ├── services/
 │   │   └── llm_service.py
 │   └── main.py
-├── docker-compose.yml
+├── llama.cpp/         # llama.cpp compiled with Metal support
+├── models/            # Your GGUF model files
 ├── Dockerfile
+├── docker-compose.yml
 ├── requirements.txt
 └── README.md
 ```
 
-## Configuration
+---
 
-### Environment Variables
+## 🔐 Environment Configuration
 
-- `LLM_SERVER_URL`: URL of the llama.cpp server (default: http://host.docker.internal:8080)
+Set via Docker or `.env` file (optional):
 
-### Docker Configuration
+- `LLM_SERVER_URL=http://host.docker.internal:8080`
 
-The FastAPI server runs in a Docker container and communicates with the local llama.cpp server using `host.docker.internal`.
+---
 
-## Development
-
-1. Make changes to the code
-2. The FastAPI server will automatically reload due to the `--reload` flag
-3. For changes to take effect in Docker, rebuild the container:
+## ⚙️ Development
 
 ```bash
+# Local hot-reload development
+uvicorn app.main:app --reload
+
+# Or inside Docker
 docker compose build
 docker compose up
 ```
 
-## Performance Considerations
+---
 
-- The llama.cpp server runs directly on your machine for better performance
-- CPU-based inference may be slower than GPU-based solutions
-- Adjust the `timeout` in `llm_service.py` if needed for longer responses
+## 🚦 Performance Tips
 
-## License
+- Make sure you use the `--mlock` flag for best performance on macOS
+- Metal GPU acceleration is enabled via `LLAMA_METAL=1`
+- Keep logs open via: `tail -f llama-server.log`
+
+---
+
+## 📜 License
 
 [Your License Here]
 
-## Contributing
+---
+
+## 🤝 Contributing
 
 [Your Contribution Guidelines Here]
+
+---
+````
